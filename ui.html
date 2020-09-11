@@ -1,9 +1,21 @@
-<h2>Rectangle Creator Test</h2>
-<p>Count: <input id="count" value="5"></p>
-<button id="create">Create</button>
-<button id="cancel">Cancel</button>
-<script>
+<h2>Color Token Finder</h2>
+<div id="TokenList"></div>
 
+<script>
+onmessage = (event) => {
+  console.log("got this from the plugin code", event.data.pluginMessage)
+  listTokens(event.data.pluginMessage)
+}
+
+function listTokens(tokenstring) {
+  var splitted = tokenstring.split(",");  
+  var list = document.getElementById('TokenList');
+
+  splitted.forEach(function (value) {
+    list.innerHTML += value + "<br>"; 
+  }); 
+}
+/**
 document.getElementById('create').onclick = () => {
   const textbox = document.getElementById('count');
   const count = parseInt(textbox.value, 10);
@@ -13,5 +25,6 @@ document.getElementById('create').onclick = () => {
 document.getElementById('cancel').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
 }
+*/
 
 </script>
