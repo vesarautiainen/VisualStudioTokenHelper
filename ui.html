@@ -8,7 +8,7 @@ onmessage = (event) => {
 }
 
 function listTokens(tokenstring) {
-  var splitted = tokenstring.split(",");  
+  var splitted = tokenstring.split("TokenId:");  
   var list = document.getElementById('TokenList');
 
   splitted.forEach(function (value) {

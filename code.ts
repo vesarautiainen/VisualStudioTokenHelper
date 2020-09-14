@@ -7,10 +7,42 @@
 
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__);
-figma.ui.postMessage("CommonControls.ButtonBackground,Category.TestToken,Environment.DropdownText");
+
+for (const node of figma.currentPage.selection) {
+  
+  if (node.type == "INSTANCE") {
+    console.log("enter")
+    for (const child of node.children) {
+      if (child.type == "RECTANGLE") {
+        let styleId = child.fillStyleId
+        if (styleId !== figma.mixed) {
+          console.log(figma.getStyleById(styleId).description)
+          figma.ui.postMessage(figma.getStyleById(styleId).description)
+        }
+        
+      }
+    } 
+  }
+}
+
+// let count = 0
+// function traverse(node) {
+//   if ("children" in node) {
+//     count++
+//     if (node.type !== "INSTANCE") {
+//       for (const child of node.children) {
+//         traverse(child)
+//       }
+//     }
+//   }
+// }
+// traverse(figma.root)
+//figma.ui.postMessage("CommonControls.ButtonBackground,Category.TestToken,Environment.DropdownText");
+
 // Calls to "parent.postMessage" from within the HTML page will trigger this
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
+
 figma.ui.onmessage = msg => {
   // One way of distinguishing between different types of messages sent from
   // your HTML page is to use an object with a "type" property like this.
