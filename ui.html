@@ -1,5 +1,9 @@
 <h2>Color Token Finder</h2>
-<div id="TokenList"></div>
+<div>
+  <div id="token-list"></div>
+  <input type="text" id="count">
+  <button id="create">Create</button>
+</div>
 
 <script>
 onmessage = (event) => {
@@ -9,19 +13,20 @@ onmessage = (event) => {
 
 function listTokens(tokenstring) {
   var splitted = tokenstring.split("TokenId:");  
-  var list = document.getElementById('TokenList');
+  var list = document.getElementById('token-list');
 
   splitted.forEach(function (value) {
     list.innerHTML += value + "<br>"; 
   }); 
 }
-/**
+
 document.getElementById('create').onclick = () => {
   const textbox = document.getElementById('count');
   const count = parseInt(textbox.value, 10);
-  parent.postMessage({ pluginMessage: { type: 'create-rectangles', count } }, '*')
+  parent.postMessage({ pluginMessage: { type: 'create-typography-annotation', count } }, '*')
 }
 
+/**
 document.getElementById('cancel').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
 }
