@@ -1,21 +1,52 @@
-<h2>Component Token Finder</h2>
+<link rel="stylesheet" href="https://static.figma.com/api/figma-extension-api-0.0.1.css">
+
 <div>
-  <div id="token-list"></div>
-  <button id="create-typography-all">Create font annotations</button>
+  <h3>Color Tokens</h3>
+  <div>
+    <div id="color-list"></div>
+    <button id="create-color-all">Annotate All Color Tokens</button>
+  </div>
+  <h3>Font Tokens</h3>
+  <div>
+    <div id="typography-list"></div>
+    <button id="create-typography-all">Annotate All Fonts</button>
+  </div>
 </div>
 
 <script>
 onmessage = (event) => {
   console.log("got this from the plugin code", event.data.pluginMessage)
-  listTokens(event.data.pluginMessage)
+  listColorTokens(event.data.pluginMessage.ColorStyles)
+  listTypographyTokens(event.data.pluginMessage.TextStyles)
 }
 
-function listTokens(tokenstring) {
-  var splitted = tokenstring.split("TokenId:");  
-  var list = document.getElementById('token-list');
+function listColorTokens(tokens) {
+  var targetList = document.getElementById('color-list');
 
-  splitted.forEach(function (value) {
-    list.innerHTML += value + "<br>"; 
+  tokens.forEach(function (node) {
+    let colorTokenId = "[token:";
+    let tokenValue = node.value;
+    let verifyString = node.value.toLowerCase();
+    let colorTokenIdIndex = verifyString.indexOf(colorTokenId) + colorTokenId.length;
+
+    if (verifyString.includes(colorTokenId)) {
+      tokenValue = tokenValue.slice(colorTokenIdIndex + colorTokenId.length)
+      tokenValue = tokenValue.replace(']', '');
+      tokenValue = tokenValue.replace(' ', '');
+    } else {
+      tokenValue = "No token id found"
+    }
+    console.log(tokenValue);
+
+    targetList.innerHTML += tokenValue + "<br>"; 
+  }); 
+}
+
+function listTypographyTokens(tokens) {
+  var targetList = document.getElementById('typography-list');
+
+  tokens.forEach(function (token) {
+    targetList.innerHTML += token.value + "<br>"; 
   }); 
 }
 
