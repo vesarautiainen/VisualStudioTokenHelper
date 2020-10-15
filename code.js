@@ -10,31 +10,37 @@ var TokenType;
     TokenType[TokenType["Font"] = 1] = "Font";
     TokenType[TokenType["Color"] = 2] = "Color";
 })(TokenType || (TokenType = {}));
-function TokenItem(type, value) {
-    this.type = type;
-    this.value = value;
-}
-// @TODO: When you find an item with a text style or color style add it to the structure 
-// (add reference to the corresponding item so you can find it easily with that)
-// @TODO: Pass the structure to the UI layer and show the structure to the user
-// @TODO: Hover over a token item and show it on the page
-// @TODO: Button to create a token for an item
-// @TODO: Button to create all typography tokens
-// @TODO: Return the same structure filtered to items the user wants to add
-// @TODO: Create annotation instances of the selected tokens, inject correct data
-// @TODO: Place the annotation instances to the correct location
 let nodesWithStyles = {};
-let nodes = {};
 // Go through the whole subtree of item from the selection
 for (const node of figma.currentPage.selection) {
+    console.log(node);
     if (node.type == "INSTANCE" || node.type == "GROUP" || node.type == "FRAME") {
+        var colorStyleArray = [];
+        var textStyleArray = [];
         // Find all nodes with fill style and add to the array
-        nodes.ColorStyles = node.findAll(n => n.type == "RECTANGLE" && n.fillStyleId !== figma.mixed ||
+        const nodesWithColorStyle = node.findAll(n => n.type == "RECTANGLE" && n.fillStyleId !== figma.mixed ||
             n.type == "TEXT" && n.fillStyleId !== "");
+        console.log("nodesWithColorStyle", nodesWithColorStyle);
+        nodesWithColorStyle.forEach(element => {
+            if (element.type == "RECTANGLE" || element.type == "TEXT") {
+                colorStyleArray.push({ "nodeId": element.id, "value": element.name });
+            }
+        });
+        nodesWithStyles.ColorStyles = colorStyleArray;
         // Find all nodes with text style and add to the array
-        nodes.TextStyles = node.findAll(n => n.type == "TEXT" && n.textStyleId !== "");
+        const nodesWithTextStyle = node.findAll(n => n.type == "TEXT" && n.textStyleId !== "");
+        nodesWithTextStyle.forEach(element => {
+            if (element.type == "TEXT") {
+                const styleId = element.textStyleId;
+                if (styleId && styleId !== figma.mixed) {
+                    textStyleArray.push({ "nodeId": element.id, "value": figma.getStyleById(styleId).description });
+                }
+            }
+        });
+        nodesWithStyles.TextStyles = textStyleArray;
+        console.log("This is what I'm passing", nodesWithStyles);
         // Handle the nodes with styles to the UI to show
-        figma.ui.postMessage(nodes);
+        figma.ui.postMessage(nodesWithStyles);
         // for (const child of node.children) {
         //   if (child.type == "RECTANGLE") {
         //     let styleId = child.fillStyleId

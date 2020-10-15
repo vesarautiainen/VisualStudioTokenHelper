@@ -13,13 +13,6 @@ enum TokenType {
   Color
 }
 
-function TokenItem(type: TokenType, value: string) {
-  this.type = type;
-  this.value = value;
-}
-
-
-
 
 // @TODO: When you find an item with a text style or color style add it to the structure 
 // (add reference to the corresponding item so you can find it easily with that)
@@ -38,29 +31,47 @@ function TokenItem(type: TokenType, value: string) {
 
 // @TODO: Place the annotation instances to the correct location
 
-
-let nodesWithStyles = {};
-
 interface NodesWithStyles {
   ColorStyles?: any,
   TextStyles?: any
 }
 
-let nodes: NodesWithStyles = {};
+let nodesWithStyles: NodesWithStyles = {};
 // Go through the whole subtree of item from the selection
 for (const node of figma.currentPage.selection) {
+  console.log(node)
   if (node.type == "INSTANCE" || node.type == "GROUP" || node.type == "FRAME") {
+    var colorStyleArray = [];
+    var textStyleArray = [];
     // Find all nodes with fill style and add to the array
-    nodes.ColorStyles = node.findAll(n => 
+    const nodesWithColorStyle = node.findAll(n => 
       n.type == "RECTANGLE" && n.fillStyleId !== figma.mixed ||
       n.type == "TEXT" && n.fillStyleId !== ""
       );
+      console.log("nodesWithColorStyle", nodesWithColorStyle)
+      nodesWithColorStyle.forEach(element => {
+        if (element.type == "RECTANGLE" || element.type == "TEXT") {
+          colorStyleArray.push({"nodeId": element.id, "value": element.name})
+        }
+      });
+      nodesWithStyles.ColorStyles = colorStyleArray;
 
     // Find all nodes with text style and add to the array
-    nodes.TextStyles = node.findAll(n => n.type == "TEXT" && n.textStyleId !== "");
-    
+    const nodesWithTextStyle = node.findAll(n => n.type == "TEXT" && n.textStyleId !== "");
+
+    nodesWithTextStyle.forEach(element => {
+      if (element.type == "TEXT") {
+        const styleId = element.textStyleId
+        if (styleId && styleId !== figma.mixed) {
+          textStyleArray.push({"nodeId": element.id, "value": figma.getStyleById(styleId).description})
+        }
+      }
+    });
+
+    nodesWithStyles.TextStyles = textStyleArray;
+    console.log("This is what I'm passing", nodesWithStyles)
     // Handle the nodes with styles to the UI to show
-    figma.ui.postMessage(nodes);
+    figma.ui.postMessage(nodesWithStyles);
 
     // for (const child of node.children) {
     //   if (child.type == "RECTANGLE") {
