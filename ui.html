@@ -1,8 +1,7 @@
-<h2>Color Token Finder</h2>
+<h2>Component Token Finder</h2>
 <div>
   <div id="token-list"></div>
-  <input type="text" id="count">
-  <button id="create">Create</button>
+  <button id="create-typography-all">Create font annotations</button>
 </div>
 
 <script>
@@ -20,10 +19,8 @@ function listTokens(tokenstring) {
   }); 
 }
 
-document.getElementById('create').onclick = () => {
-  const textbox = document.getElementById('count');
-  const count = parseInt(textbox.value, 10);
-  parent.postMessage({ pluginMessage: { type: 'create-typography-annotation', count } }, '*')
+document.getElementById('create-typography-all').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'create-typography-annotation-all'} }, '*')
 }
 
 /**

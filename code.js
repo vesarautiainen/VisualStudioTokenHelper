@@ -5,25 +5,48 @@
 // full browser environment (see documentation).
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__);
-var AnnotationType;
-(function (AnnotationType) {
-    AnnotationType[AnnotationType["Font"] = 1] = "Font";
-    AnnotationType[AnnotationType["Color"] = 2] = "Color";
-})(AnnotationType || (AnnotationType = {}));
+var TokenType;
+(function (TokenType) {
+    TokenType[TokenType["Font"] = 1] = "Font";
+    TokenType[TokenType["Color"] = 2] = "Color";
+})(TokenType || (TokenType = {}));
+function TokenItem(type, value) {
+    this.type = type;
+    this.value = value;
+}
+// @TODO: When you find an item with a text style or color style add it to the structure 
+// (add reference to the corresponding item so you can find it easily with that)
+// @TODO: Pass the structure to the UI layer and show the structure to the user
+// @TODO: Hover over a token item and show it on the page
+// @TODO: Button to create a token for an item
+// @TODO: Button to create all typography tokens
+// @TODO: Return the same structure filtered to items the user wants to add
+// @TODO: Create annotation instances of the selected tokens, inject correct data
+// @TODO: Place the annotation instances to the correct location
+let nodesWithStyles = {};
+let nodes = {};
+// Go through the whole subtree of item from the selection
 for (const node of figma.currentPage.selection) {
-    if (node.type == "INSTANCE") {
-        for (const child of node.children) {
-            if (child.type == "RECTANGLE") {
-                let styleId = child.fillStyleId;
-                if (styleId !== figma.mixed) {
-                    console.log(figma.getStyleById(styleId).description);
-                    figma.ui.postMessage(figma.getStyleById(styleId).description);
-                }
-            }
-        }
+    if (node.type == "INSTANCE" || node.type == "GROUP" || node.type == "FRAME") {
+        // Find all nodes with fill style and add to the array
+        nodes.ColorStyles = node.findAll(n => n.type == "RECTANGLE" && n.fillStyleId !== figma.mixed ||
+            n.type == "TEXT" && n.fillStyleId !== "");
+        // Find all nodes with text style and add to the array
+        nodes.TextStyles = node.findAll(n => n.type == "TEXT" && n.textStyleId !== "");
+        // Handle the nodes with styles to the UI to show
+        figma.ui.postMessage(nodes);
+        // for (const child of node.children) {
+        //   if (child.type == "RECTANGLE") {
+        //     let styleId = child.fillStyleId
+        //     if (styleId !== figma.mixed) {
+        //       console.log(figma.getStyleById(styleId).description)
+        //       figma.ui.postMessage(figma.getStyleById(styleId).description)
+        //     }
+        //   }
+        // } 
     }
 }
-function getComponent(type) {
+function createAnnotation(type) {
     var component = figma.currentPage.findOne(n => n.name === "Token Annotation / Typography");
     if (component != undefined) {
         var instance = component.createInstance();
@@ -32,9 +55,9 @@ function getComponent(type) {
     }
 }
 figma.ui.onmessage = msg => {
-    if (msg.type === 'create-typography-annotation') {
+    if (msg.type === 'create-typography-annotation-all') {
         const nodes = [];
-        const annotation = getComponent(AnnotationType.Font);
+        const annotation = createAnnotation(TokenType.Font);
         if (annotation) {
             figma.currentPage.appendChild(annotation);
             nodes.push(annotation);
@@ -42,10 +65,11 @@ figma.ui.onmessage = msg => {
             figma.viewport.scrollAndZoomIntoView(nodes);
         }
         else {
-            console.log("No annotation instance found");
+            // @TODO: create a fallback annotation style
+            console.log("Error: No annotation instance found");
         }
     }
     // Make sure to close the plugin when you're done. Otherwise the plugin will
     // keep running, which shows the cancel button at the bottom of the screen.
-    figma.closePlugin();
+    //figma.closePlugin();
 };
