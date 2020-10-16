@@ -1,0 +1,63 @@
+<link rel="stylesheet" href="https://static.figma.com/api/figma-extension-api-0.0.1.css">
+
+<div>
+  <h2>Color Tokens</h2>
+  <div>
+    <div id="color-list"></div>
+    <button id="create-color-all">Annotate All Color Tokens</button>
+  </div>
+  <h2>Font Tokens</h2>
+  <div>
+    <div id="typography-list"></div>
+    <button id="create-typography-all">Annotate All Fonts</button>
+  </div>
+</div>
+
+<script>
+onmessage = (event) => {
+  console.log("got this from the plugin code", event.data.pluginMessage)
+  listColorTokens(event.data.pluginMessage.ColorStyles)
+  listTypographyTokens(event.data.pluginMessage.TextStyles)
+}
+
+function listColorTokens(tokens) {
+  var targetList = document.getElementById('color-list');
+
+  tokens.forEach(function (node) {
+    let colorTokenId = "[token:";
+    let tokenValue = node.value;
+    let verifyString = node.value.toLowerCase();
+    let colorTokenIdIndex = verifyString.indexOf(colorTokenId) + colorTokenId.length;
+
+    if (verifyString.includes(colorTokenId)) {
+      tokenValue = tokenValue.slice(colorTokenIdIndex + colorTokenId.length)
+      tokenValue = tokenValue.replace(']', '');
+      tokenValue = tokenValue.replace(' ', '');
+    } else {
+      tokenValue = "No token id found"
+    }
+    console.log(tokenValue);
+
+    targetList.innerHTML += tokenValue + "<br>"; 
+  }); 
+}
+
+function listTypographyTokens(tokens) {
+  var targetList = document.getElementById('typography-list');
+
+  tokens.forEach(function (token) {
+    targetList.innerHTML += token.value + "<br>"; 
+  }); 
+}
+
+document.getElementById('create-typography-all').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'create-typography-annotation-all'} }, '*')
+}
+
+/**
+document.getElementById('cancel').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}
+*/
+
+</script>
