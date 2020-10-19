@@ -24,11 +24,11 @@ interface NodesWithStyles2 {
 
 function checkNodeForStyles(node) {
   // Fill style. The token name is currently embedded in the node name.
-  if (node.fillStyleId != undefined && node.fillStyleId != "") {
+  if (node.fillStyleId != undefined && node.fillStyleId != "" && node.visible) {
     colorStyleArray.push({"nodeId": node.id, "value": extractTokenNameFromNodeName(node.name)})
   }
     // Text style. The font token name is currently in the style description.
-  if (node.textStyleId != undefined && node.textStyleId != "") {
+  if (node.textStyleId != undefined && node.textStyleId != "" && node.visible) {
     textStyleArray.push({"nodeId": node.id, "value": figma.getStyleById(node.textStyleId).description})
   }
 }
@@ -85,10 +85,18 @@ function initFailure() {
 
 // -------------------Events from the UI ------------------------------
 function createAnnotation2(type: TokenType2):InstanceNode {
-  var component = <ComponentNode>figma.currentPage.findOne(n => n.name === "Token Annotation / Typography")
+  var component : ComponentNode;
+  var instanceName : string;
+  if (type == TokenType2.Font) {
+    component = <ComponentNode>figma.currentPage.findOne(n => n.name === "Token Annotation / Typography")
+    instanceName = "Font Annotation";  
+  } else {
+    component = <ComponentNode>figma.currentPage.findOne(n => n.name === "Token Annotation / Color")
+    instanceName = "Color Token Annotation";  
+  }
   if (component != undefined) {
     var instance:InstanceNode = component.createInstance();
-    instance.name = "Font annotation";  
+    instance.name = instanceName;  
     return instance;
   } else {
     console.log("Error: Could not creat annotation instance")
@@ -96,6 +104,35 @@ function createAnnotation2(type: TokenType2):InstanceNode {
 }
 
 figma.ui.onmessage = msg => {
+
+  if (msg.type === 'create-color-annotation-all') {
+    const nodes: SceneNode[] = [];
+    nodesWithStyles2.ColorStyles.forEach(element => {
+      const annotationInstance = createAnnotation2(TokenType2.Color);
+      if (annotationInstance) {
+        // set data
+        var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
+        label.characters = "Color Token: " + element.value
+
+        // find the original node and set the annotation label position
+        let originalNode = <TextNode>figma.getNodeById(element.nodeId);
+        console.log(originalNode.absoluteTransform)
+        let xOrigin = originalNode.absoluteTransform[0][2]
+        let yOrigin = originalNode.absoluteTransform[1][2]
+        annotationInstance.resize(annotationInstance.width,randomInteger(30,150))
+        let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
+        let yPos = yOrigin - annotationInstance.height + originalNode.height / 2;
+        annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
+  
+        figma.currentPage.appendChild(annotationInstance);
+        nodes.push(annotationInstance);
+      } else {
+        // @TODO: create a fallback annotation style
+        console.log("Error: No annotation instance found")
+      }
+      
+    });
+  }
 
   if (msg.type === 'create-typography-annotation-all') {
     const nodes: SceneNode[] = [];
@@ -105,7 +142,7 @@ figma.ui.onmessage = msg => {
       if (annotationInstance) {
         // set data
         var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
-        label.characters = element.value
+        label.characters = "Font Token: " + element.value
 
         // find the original node and set the annotation label position
         let originalNode = <TextNode>figma.getNodeById(element.nodeId);
@@ -113,7 +150,7 @@ figma.ui.onmessage = msg => {
         let xOrigin = originalNode.absoluteTransform[0][2]
         let yOrigin = originalNode.absoluteTransform[1][2]
         let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
-        let yPos = yOrigin - annotationInstance.height + originalNode.height / 2;
+        let yPos = yOrigin + originalNode.height / 2;
         annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
   
         figma.currentPage.appendChild(annotationInstance);
@@ -131,5 +168,9 @@ figma.ui.onmessage = msg => {
 
 }
   
+function randomInteger(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 // start the traversal at the root
 //figma.closePlugin()

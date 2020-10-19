@@ -41,6 +41,10 @@ var hoverCallback = function(sender) {
   parent.postMessage({ pluginMessage: { type: 'token-hover', nodeId: sender.id} }, '*')
 }
 
+document.getElementById('create-color-all').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'create-color-annotation-all'} }, '*')
+}
+
 document.getElementById('create-typography-all').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'create-typography-annotation-all'} }, '*')
 }
