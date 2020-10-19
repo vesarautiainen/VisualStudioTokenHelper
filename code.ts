@@ -90,6 +90,8 @@ function createAnnotation2(type: TokenType2):InstanceNode {
     var instance:InstanceNode = component.createInstance();
     instance.name = "Font annotation";  
     return instance;
+  } else {
+    console.log("Error: Could not creat annotation instance")
   }
 }
 
@@ -105,6 +107,15 @@ figma.ui.onmessage = msg => {
         var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
         label.characters = element.value
 
+        // find the original node and set the annotation label position
+        let originalNode = <TextNode>figma.getNodeById(element.nodeId);
+        console.log(originalNode.absoluteTransform)
+        let xOrigin = originalNode.absoluteTransform[0][2]
+        let yOrigin = originalNode.absoluteTransform[1][2]
+        let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
+        let yPos = yOrigin - annotationInstance.height + originalNode.height / 2;
+        annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
+  
         figma.currentPage.appendChild(annotationInstance);
         nodes.push(annotationInstance);
       } else {
