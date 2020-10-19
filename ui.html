@@ -31,8 +31,14 @@ function listTokens(tokenArray, listId) {
     let div = document.createElement("div");
     div.textContent = token.value
     div.style = "height:20px;"
+    div.id = token.nodeId;
     targetList.appendChild(div);
   }); 
+}
+
+var hoverCallback = function(sender) {
+  console.log(sender.id)
+  parent.postMessage({ pluginMessage: { type: 'token-hover', nodeId: sender.id} }, '*')
 }
 
 document.getElementById('create-typography-all').onclick = () => {
