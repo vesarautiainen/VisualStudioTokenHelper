@@ -1,12 +1,13 @@
+
 <link rel="stylesheet" href="https://static.figma.com/api/figma-extension-api-0.0.1.css">
-<link rel="stylesheet" href="localstyles.css" />
 
 <div>
   <div id:"color-tokens">
     <h1>Color Tokens</h1>
     <div>
       <div style="margin-top:10px;" id="color-list"></div>
-      <button id="create-color-all">Annotate All Color Tokens</button>
+      <button id="create-color-all" class='button button--primary'>Annotate All Color Tokens</button>
+      
     </div>
   </div>
   <div id:"font-tokens" style="margin-top:20px;">
@@ -33,8 +34,9 @@ function listTokens(tokenArray, destinationListId) {
 
   tokenArray.forEach(function (token) {
     let div = document.createElement("div");
-    div.className = "tokenDiv"
-    div.textContent = "Token name: " + token.value
+    //div.textContent = "Token name: " + token.value
+    
+    div.innerHTML += "Layer: " + token.nodeName + "<br/>" + "Token: " + token.value 
     div.style = "height:auto; border: 1px solid lightGray; border-radius: 4px; padding: 5px; margin: 10px 0px 10px 0px; vertical-align: middle;"
     div.id = token.nodeId;
     targetList.appendChild(div);

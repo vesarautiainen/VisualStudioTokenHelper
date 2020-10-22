@@ -21,20 +21,28 @@ var colorStyleArray = [];
 var textStyleArray = [];
 function checkNodeForStyles(node) {
     // Fill style. The token name is currently embedded in the node name.
+    var values;
     if (node.fillStyleId != undefined && node.fillStyleId != "" && node.visible) {
-        colorStyleArray.push({ "nodeId": node.id, "value": extractTokenNameFromNodeName(node.name) });
+        colorStyleArray.push({ "nodeId": node.id, "nodeName": extractLayerName(node.name), "value": extractTokenName(node.name) });
     }
     // Text style. The font token name is currently in the style description.
     if (node.textStyleId != undefined && node.textStyleId != "" && node.visible) {
-        textStyleArray.push({ "nodeId": node.id, "value": figma.getStyleById(node.textStyleId).description });
+        textStyleArray.push({ "nodeId": node.id, "nodeName": extractLayerName(node.name), "value": figma.getStyleById(node.textStyleId).description });
     }
 }
-function extractTokenNameFromNodeName(text) {
+function extractLayerName(text) {
+    let colorTokenId = "[token:";
+    let layerName = text;
+    let verifyString = text.toLowerCase();
+    let foundIndex = verifyString.indexOf(colorTokenId);
+    return foundIndex ? layerName.slice(0, foundIndex) : layerName;
+}
+function extractTokenName(text) {
     let colorTokenId = "[token:";
     let tokenValue = text;
     let verifyString = text.toLowerCase();
     let foundIndex = verifyString.indexOf(colorTokenId);
-    if (verifyString.includes(colorTokenId)) {
+    if (foundIndex && verifyString.includes(colorTokenId)) {
         tokenValue = tokenValue.slice(foundIndex + colorTokenId.length);
         tokenValue = tokenValue.replace(']', '');
         tokenValue = tokenValue.replace(' ', '');
