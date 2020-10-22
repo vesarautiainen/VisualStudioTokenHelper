@@ -5,19 +5,28 @@
 // You can access browser APIs in the <script> tag inside "ui.html" which has a
 // full browser environment (see documentation).
 
+
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__);
 
-enum TokenType2 {
+enum TokenType {
   Font = 1,
   Color
 }
 
-let nodesWithStyles2: NodesWithStyles2 = {};
+enum ColorTheme {
+  Blue = 1,
+  Light, 
+  Dark
+}
+
+let nodesWithStyles: nodesWithStyles = {};
 var colorStyleArray = [];
 var textStyleArray = [];
 
-interface NodesWithStyles2 {
+
+// The datastructure that contains all the nodes with associated styles and will be passed to the UI
+interface nodesWithStyles {
   ColorStyles?: any,
   TextStyles?: any
 }
@@ -64,30 +73,27 @@ function traverse(node) {
 figma.loadFontAsync({family: "Consolas", style: "Regular"}).then(initSuccess, initFailure)
 
 function initSuccess() {
-
   // Go through the all the nodes in the current selection
   for (const node of figma.currentPage.selection) {
     traverse(node) 
   }
 
-  nodesWithStyles2.ColorStyles = colorStyleArray;
-  nodesWithStyles2.TextStyles = textStyleArray;
+  nodesWithStyles.ColorStyles = colorStyleArray;
+  nodesWithStyles.TextStyles = textStyleArray;
 
   // Send nodes with styles to the UI
-  figma.ui.postMessage(nodesWithStyles2);
+  figma.ui.postMessage(nodesWithStyles);
 }
 
 function initFailure() {
   console.log("Required fonts failed to load. Exit.")
 }
 
-
-
 // -------------------Events from the UI ------------------------------
-function createAnnotation2(type: TokenType2):InstanceNode {
+function createAnnotation(type: TokenType):InstanceNode {
   var component : ComponentNode;
   var instanceName : string;
-  if (type == TokenType2.Font) {
+  if (type == TokenType.Font) {
     component = <ComponentNode>figma.currentPage.findOne(n => n.name === "Token Annotation / Typography")
     instanceName = "Font Annotation";  
   } else {
@@ -103,12 +109,27 @@ function createAnnotation2(type: TokenType2):InstanceNode {
   }
 }
 
+//Commands from the UI 
 figma.ui.onmessage = msg => {
-
   if (msg.type === 'create-color-annotation-all') {
-    const nodes: SceneNode[] = [];
-    nodesWithStyles2.ColorStyles.forEach(element => {
-      const annotationInstance = createAnnotation2(TokenType2.Color);
+    annotateAllColorTokens();
+  }
+  else if (msg.type === 'create-typography-annotation-all') {
+    annotateAllTypographyTokens();
+  } else if (msg.type === 'change-theme-version') {
+    // @TODO: figure out how to do this theming properly in type script.
+    if (msg.themeId == "Dark") {
+      changeTheme(ColorTheme.Dark)
+    }
+  }
+}
+
+// Annotate tokens
+//------------------------------------------------------
+function annotateAllColorTokens() {
+  const nodes: SceneNode[] = [];
+    nodesWithStyles.ColorStyles.forEach(element => {
+      const annotationInstance = createAnnotation(TokenType.Color);
       if (annotationInstance) {
         // set data
         var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
@@ -130,47 +151,65 @@ figma.ui.onmessage = msg => {
         // @TODO: create a fallback annotation style
         console.log("Error: No annotation instance found")
       }
-      
     });
-  }
-
-  if (msg.type === 'create-typography-annotation-all') {
-    const nodes: SceneNode[] = [];
-
-    nodesWithStyles2.TextStyles.forEach(element => {
-      const annotationInstance = createAnnotation2(TokenType2.Font);
-      if (annotationInstance) {
-        // set data
-        var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
-        label.characters = "Font Token: " + element.value
-
-        // find the original node and set the annotation label position
-        let originalNode = <TextNode>figma.getNodeById(element.nodeId);
-        console.log(originalNode.absoluteTransform)
-        let xOrigin = originalNode.absoluteTransform[0][2]
-        let yOrigin = originalNode.absoluteTransform[1][2]
-        let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
-        let yPos = yOrigin + originalNode.height / 2;
-        annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
-  
-        figma.currentPage.appendChild(annotationInstance);
-        nodes.push(annotationInstance);
-      } else {
-        // @TODO: create a fallback annotation style
-        console.log("Error: No annotation instance found")
-      }
-    });
-    
-    figma.currentPage.selection = nodes;
-    figma.viewport.scrollAndZoomIntoView(nodes);
-    
-  }
-
 }
+
+function annotateAllTypographyTokens() {
+  const nodes: SceneNode[] = [];
+
+  nodesWithStyles.TextStyles.forEach(element => {
+    const annotationInstance = createAnnotation(TokenType.Font);
+    if (annotationInstance) {
+      // set data
+      var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
+      label.characters = "Font Token: " + element.value
+
+      // find the original node and set the annotation label position
+      let originalNode = <TextNode>figma.getNodeById(element.nodeId);
+      console.log(originalNode.absoluteTransform)
+      let xOrigin = originalNode.absoluteTransform[0][2]
+      let yOrigin = originalNode.absoluteTransform[1][2]
+      let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
+      let yPos = yOrigin + originalNode.height / 2;
+      annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
+
+      figma.currentPage.appendChild(annotationInstance);
+      nodes.push(annotationInstance);
+    } else {
+      // @TODO: create a fallback annotation style
+      console.log("Error: No annotation instance found")
+    }
+  });
   
+  figma.currentPage.selection = nodes;
+  figma.viewport.scrollAndZoomIntoView(nodes);
+}
+
+// Change theme (placeholder functions)
+//------------------------------------------------------
+function changeTheme(theme:ColorTheme) {
+  var xhttp = new XMLHttpRequest();
+  
+  xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+          myFunction(this);
+      }
+  };
+  xhttp.open("GET", "Themes/Theme.Dark.xml", true);
+  xhttp.send();
+}
+
+function myFunction(xml) {
+  var xmlDoc = xml.responseXML;
+//     var x = xmlDoc.getElementsByTagName('Category').[Name "Components"];
+//     var y = x.childNodes[0];
+//     document.getElementById("demo").innerHTML = y.nodeValue
+}
+
+// Utils 
+//------------------------------------------------------
 function randomInteger(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-// start the traversal at the root
 //figma.closePlugin()
