@@ -1,15 +1,16 @@
 <link rel="stylesheet" href="https://static.figma.com/api/figma-extension-api-0.0.1.css">
+<link rel="stylesheet" href="localstyles.css" />
 
 <div>
   <div id:"color-tokens">
-    <h2>Color Tokens</h2>
+    <h1>Color Tokens</h1>
     <div>
       <div style="margin-top:10px;" id="color-list"></div>
       <button id="create-color-all">Annotate All Color Tokens</button>
     </div>
   </div>
-  <div id:"font-tokens">
-    <h2>Font Tokens</h2>
+  <div id:"font-tokens" style="margin-top:20px;">
+    <h1>Font Tokens</h1>
     <div>
       <div id="typography-list"></div>
       <button id="create-typography-all">Annotate All Fonts</button>
@@ -32,8 +33,9 @@ function listTokens(tokenArray, destinationListId) {
 
   tokenArray.forEach(function (token) {
     let div = document.createElement("div");
-    div.textContent = token.value
-    div.style = "height:20px;"
+    div.className = "tokenDiv"
+    div.textContent = "Token name: " + token.value
+    div.style = "height:auto; border: 1px solid lightGray; border-radius: 4px; padding: 5px; margin: 10px 0px 10px 0px; vertical-align: middle;"
     div.id = token.nodeId;
     targetList.appendChild(div);
   }); 
@@ -52,10 +54,9 @@ document.getElementById('create-typography-all').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'create-typography-annotation-all'} }, '*')
 }
 
-
-document.getElementById('change-theme').onclick = () => {
-  parent.postMessage({ pluginMessage: { type: 'change-theme-version', themeId: "Dark"} }, '*')
-}
+//document.getElementById('change-theme').onclick = () => {
+//  parent.postMessage({ pluginMessage: { type: 'change-theme-version', themeId: "Dark"} }, '*')
+//}
 
 /**
 document.getElementById('cancel').onclick = () => {

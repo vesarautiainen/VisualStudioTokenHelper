@@ -11,5 +11,8 @@
   "devDependencies": {
     "@figma/plugin-typings": "^1.17.1",
     "@types/node": "^14.11.11"
+  },
+  "dependencies": {
+    "figma-plugin-ds": "^0.1.8"
   }
 }
