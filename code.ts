@@ -123,14 +123,15 @@ function createAnnotation(type: TokenType):InstanceNode {
 figma.ui.onmessage = msg => {
   if (msg.type === 'create-color-annotation-all') {
     annotateAllColorTokens();
-  }
-  else if (msg.type === 'create-typography-annotation-all') {
+  } else if (msg.type === 'create-typography-annotation-all') {
     annotateAllTypographyTokens();
   } else if (msg.type === 'change-theme-version') {
     // @TODO: figure out how to do this theming properly in type script.
     if (msg.themeId == "Dark") {
       changeTheme(ColorTheme.Dark)
     }
+  } else if (msg.type === 'token-hover') {
+    highlightNode(msg.nodeId);
   }
 }
 
@@ -195,6 +196,27 @@ function annotateAllTypographyTokens() {
   figma.viewport.scrollAndZoomIntoView(nodes);
 }
 
+// Highlight node
+//------------------------------------------------------
+function highlightNode(nodeId:string) {
+  let highlightedNode:BaseNode = figma.getNodeById(nodeId)
+  if (figma.getNodeById(nodeId) && isSceneNode(figma.getNodeById(nodeId))) {
+    figma.currentPage.selection = [<SceneNode>figma.getNodeById(nodeId)]
+  }
+}
+
+function isSceneNode(node:BaseNode) {
+  return node.type === "FRAME" ||
+  node.type == "COMPONENT" ||
+  node.type == "INSTANCE" ||
+  node.type == "VECTOR" ||
+  node.type == "LINE" ||
+  node.type == "ELLIPSE" ||
+  node.type == "POLYGON" ||
+  node.type == "TEXT" ||
+  node.type == "RECTANGLE"
+
+}
 // Change theme (placeholder functions)
 //------------------------------------------------------
 function changeTheme(theme:ColorTheme) {

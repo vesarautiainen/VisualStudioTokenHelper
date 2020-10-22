@@ -34,18 +34,18 @@ function listTokens(tokenArray, destinationListId) {
 
   tokenArray.forEach(function (token) {
     let div = document.createElement("div");
-    //div.textContent = "Token name: " + token.value
-    
+
     div.innerHTML += "Layer: " + token.nodeName + "<br/>" + "Token: " + token.value 
-    div.style = "height:auto; border: 1px solid lightGray; border-radius: 4px; padding: 5px; margin: 10px 0px 10px 0px; vertical-align: middle;"
+    div.style = "height:auto; border: 1px solid lightGray; border-radius: 4px; padding: 5px; margin: 5px 0px 5px 0px; vertical-align: middle;"
     div.id = token.nodeId;
+    div.onmouseover = hoverCallback;
+    div.propageteEvents = false;
     targetList.appendChild(div);
   }); 
 }
 
 var hoverCallback = function(sender) {
-  console.log(sender.id)
-  parent.postMessage({ pluginMessage: { type: 'token-hover', nodeId: sender.id} }, '*')
+  parent.postMessage({ pluginMessage: { type: 'token-hover', nodeId: sender.target.id} }, '*')
 }
 
 document.getElementById('create-color-all').onclick = () => {

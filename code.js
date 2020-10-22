@@ -111,6 +111,9 @@ figma.ui.onmessage = msg => {
             changeTheme(ColorTheme.Dark);
         }
     }
+    else if (msg.type === 'token-hover') {
+        highlightNode(msg.nodeId);
+    }
 };
 // Annotate tokens
 //------------------------------------------------------
@@ -166,6 +169,25 @@ function annotateAllTypographyTokens() {
     });
     figma.currentPage.selection = nodes;
     figma.viewport.scrollAndZoomIntoView(nodes);
+}
+// Highlight node
+//------------------------------------------------------
+function highlightNode(nodeId) {
+    let highlightedNode = figma.getNodeById(nodeId);
+    if (figma.getNodeById(nodeId) && isSceneNode(figma.getNodeById(nodeId))) {
+        figma.currentPage.selection = [figma.getNodeById(nodeId)];
+    }
+}
+function isSceneNode(node) {
+    return node.type === "FRAME" ||
+        node.type == "COMPONENT" ||
+        node.type == "INSTANCE" ||
+        node.type == "VECTOR" ||
+        node.type == "LINE" ||
+        node.type == "ELLIPSE" ||
+        node.type == "POLYGON" ||
+        node.type == "TEXT" ||
+        node.type == "RECTANGLE";
 }
 // Change theme (placeholder functions)
 //------------------------------------------------------
