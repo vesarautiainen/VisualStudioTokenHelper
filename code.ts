@@ -137,18 +137,16 @@ figma.ui.onmessage = msg => {
   } else if (msg.type === 'create-color-annotation') {
     annotateColorToken(msg.nodeId, msg.tokenName)
   } else if (msg.type === 'create-typography-annotation') {
-
+    annotateTypographyToken(msg.nodeId, msg.tokenName);
   }
 }
 
 function annotateColorToken(nodeId:string, tokenName:string){
-  console.log("here: " + nodeId + " " + tokenName)
   const annotationInstance = createAnnotation(TokenType.Color);
   if (annotationInstance) {
     // set data
     var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
     label.characters = "Color Token: " + tokenName
-
     // find the original node and set the annotation label position
     let originalNode = <SceneNode>figma.getNodeById(nodeId);
     console.log(originalNode.absoluteTransform)
@@ -157,6 +155,29 @@ function annotateColorToken(nodeId:string, tokenName:string){
     annotationInstance.resize(annotationInstance.width,randomInteger(30,150))
     let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
     let yPos = yOrigin - annotationInstance.height + originalNode.height / 2;
+    annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
+
+    figma.currentPage.appendChild(annotationInstance);
+  } else {
+    // @TODO: create a fallback annotation style
+    console.log("Error: No annotation instance found")
+  }
+}
+
+function annotateTypographyToken(nodeId:string, tokenName:string){
+  const annotationInstance = createAnnotation(TokenType.Font);
+  if (annotationInstance) {
+    // set data
+    var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
+    label.characters = "Font Token: " + tokenName
+
+    // find the original node and set the annotation label position
+    let originalNode = <TextNode>figma.getNodeById(nodeId);
+    console.log(originalNode.absoluteTransform)
+    let xOrigin = originalNode.absoluteTransform[0][2]
+    let yOrigin = originalNode.absoluteTransform[1][2]
+    let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
+    let yPos = yOrigin + originalNode.height / 2;
     annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
 
     figma.currentPage.appendChild(annotationInstance);
@@ -175,34 +196,9 @@ function annotateAllColorTokens() {
 }
 
 function annotateAllTypographyTokens() {
-  //const nodes: SceneNode[] = [];
-
   nodesWithStyles.TextStyles.forEach(element => {
-    const annotationInstance = createAnnotation(TokenType.Font);
-    if (annotationInstance) {
-      // set data
-      var label = <TextNode>annotationInstance.findOne(n => n.type === "TEXT")
-      label.characters = "Font Token: " + element.value
-
-      // find the original node and set the annotation label position
-      let originalNode = <TextNode>figma.getNodeById(element.nodeId);
-      console.log(originalNode.absoluteTransform)
-      let xOrigin = originalNode.absoluteTransform[0][2]
-      let yOrigin = originalNode.absoluteTransform[1][2]
-      let xPos = xOrigin - annotationInstance.width / 2 + originalNode.width / 2;
-      let yPos = yOrigin + originalNode.height / 2;
-      annotationInstance.relativeTransform = [[1, 0, xPos],[0, 1, yPos]];
-
-      figma.currentPage.appendChild(annotationInstance);
-      //nodes.push(annotationInstance);
-    } else {
-      // @TODO: create a fallback annotation style
-      console.log("Error: No annotation instance found")
-    }
+    annotateTypographyToken(element.nodeId, element.value);
   });
-  
-  //figma.currentPage.selection = nodes;
-  //figma.viewport.scrollAndZoomIntoView(nodes);
 }
 
 // Highlight node

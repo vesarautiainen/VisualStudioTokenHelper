@@ -61,9 +61,17 @@ var handleTokenMouseover = function(sender) {
 var handleTokenClick = function(sender) {
   console.log(sender.tokenId)
   if (isColorToken(sender)) {
-    parent.postMessage({ pluginMessage: { type: 'create-color-annotation', nodeId: getId(sender.target.id), tokenName: getTokenName(sender.target.id)} }, '*')
+    parent.postMessage({ pluginMessage: { 
+      type: 'create-color-annotation', 
+      nodeId: getId(sender.target.id), 
+      tokenName: getTokenName(sender.target.id)} 
+      }, '*')
   } else {
-    parent.postMessage({ pluginMessage: { type: 'create-typography-annotation', nodeId: getId(sender.target.id), tokenName: getTokenName(sender.target.id)} }, '*')
+    parent.postMessage({ pluginMessage: { 
+      type: 'create-typography-annotation', 
+      nodeId: getId(sender.target.id), 
+      tokenName: getTokenName(sender.target.id)} 
+      }, '*')
   } 
 }
 
