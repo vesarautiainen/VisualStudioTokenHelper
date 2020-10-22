@@ -15,6 +15,9 @@
       <button id="create-typography-all">Annotate All Fonts</button>
     </div>
   </div>
+   <!--
+   <button id="change-theme">ChangeTheme</button>
+   -->
 </div>
 
 <script>
@@ -24,8 +27,8 @@ onmessage = (event) => {
   listTokens(event.data.pluginMessage.TextStyles, "typography-list")
 }
 
-function listTokens(tokenArray, listId) {
-  let targetList = document.getElementById(listId);
+function listTokens(tokenArray, destinationListId) {
+  let targetList = document.getElementById(destinationListId);
 
   tokenArray.forEach(function (token) {
     let div = document.createElement("div");
@@ -47,6 +50,11 @@ document.getElementById('create-color-all').onclick = () => {
 
 document.getElementById('create-typography-all').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'create-typography-annotation-all'} }, '*')
+}
+
+
+document.getElementById('change-theme').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'change-theme-version', themeId: "Dark"} }, '*')
 }
 
 /**
